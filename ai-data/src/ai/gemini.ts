@@ -1,5 +1,8 @@
 import { GoogleGenAI } from '@google/genai';
 
+import { assessExportResponseSchema } from '../contracts/ai.js';
+import type { AssessExportRequest, AssessExportResponse } from '../contracts/ai.js';
+
 const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
@@ -13,13 +16,9 @@ const ai = new GoogleGenAI({ apiKey });
 // Flash accuracy is insufficient on ambiguous cases (see docs/tech-stack.md).
 const MODEL = 'gemini-2.5-flash';
 
-export interface ExportAssessmentResult {
-  eligible: boolean;
-  qualityIssues: string[];
-  complianceGaps: string[];
-  confidence: number;
-}
-
+// Mirrors assessExportResponseSchema in ../contracts/ai.ts — this is the shape
+// Gemini is asked to return, and the response is validated against the contract
+// below before it leaves this module.
 const exportAssessmentSchema = {
   type: 'object',
   properties: {
@@ -31,12 +30,9 @@ const exportAssessmentSchema = {
   required: ['eligible', 'qualityIssues', 'complianceGaps', 'confidence'],
 };
 
-export async function assessExportPhoto(params: {
-  imageBase64: string;
-  mimeType: string;
-  crop: string;
-  exportStandardsSummary: string;
-}): Promise<ExportAssessmentResult> {
+export async function assessExportPhoto(
+  params: AssessExportRequest,
+): Promise<AssessExportResponse> {
   const response = await ai.models.generateContent({
     model: MODEL,
     contents: [
@@ -70,5 +66,8 @@ export async function assessExportPhoto(params: {
     throw new Error('Gemini returned no text output for export assessment');
   }
 
-  return JSON.parse(text) as ExportAssessmentResult;
+  // Parse, don't cast — a model can return well-formed JSON that still doesn't
+  // match the schema (confidence out of range, missing array). Failing here
+  // surfaces as a 502 from the route rather than as bad data downstream.
+  return assessExportResponseSchema.parse(JSON.parse(text));
 }

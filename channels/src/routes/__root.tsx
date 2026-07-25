@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 
 import appCss from '../styles.css?url'
@@ -15,11 +17,19 @@ export const Route = createRootRoute({
       {
         title: 'JuaBei',
       },
+      {
+        name: 'theme-color',
+        content: '#166534',
+      },
     ],
     links: [
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.webmanifest',
       },
     ],
   }),
@@ -27,6 +37,16 @@ export const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    // TanStack Start renders on the server too, and vite-plugin-pwa's
+    // virtual module only exists client-side, so this must stay inside an
+    // effect rather than at module scope.
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
+    void import('virtual:pwa-register').then(({ registerSW }) => {
+      registerSW({ immediate: true })
+    })
+  }, [])
+
   return (
     <html lang="en">
       <head>

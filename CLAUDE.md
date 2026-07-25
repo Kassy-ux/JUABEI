@@ -4,7 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-JuaBei is currently in the planning/documentation stage — there is no source code, build tooling, or test suite in this repo yet. The tech stack is decided (see [docs/tech-stack.md](docs/tech-stack.md)) but not yet scaffolded.
+All three lanes are scaffolded and typecheck clean. There is **no test suite and no CI** yet — deliberately deferred (see [TASKS.md](TASKS.md)).
+
+- `channels/` — TanStack Start PWA, one index route. `vite-plugin-pwa` is configured (manifest + SW registration); the production build doesn't yet emit an actual `sw.js` — the plugin's `generateSW` hook doesn't appear to fire under TanStack Start's Vite Environments (client+SSR) build. Icon PNGs under `public/` are still placeholders. No USSD/WhatsApp routes yet.
+- `services/` — Hono API Gateway on `:4000` with `/health`, `/valuation`, `/export-assessment`. Both service routes validate against the frozen contracts but return placeholder values.
+- `ai-data/` — Hono on `:4100` with `/health` and `/ai/assess-export`. The Gemini call is real and returns validated structured output. Drizzle schema is drafted (and includes a `status` lifecycle on transactions, plus richer market-data fields — currency, unit, price type, source) but no database is provisioned; the demo fakes persistence with an in-memory array instead (see [TASKS.md](TASKS.md)). SMS/WhatsApp senders are stubs that throw (including on missing credentials — they never resolve silently).
+
+Each lane is an independent npm project with its own `package-lock.json` — **npm, not pnpm**, and no workspace at the root. Run `npm install` inside each lane. All three lanes have ESLint + Prettier (`npm run lint` / `npm run format` / `npm run check`).
+
+## Cross-lane contracts
+
+The Zod schemas in `services/src/contracts/` are the source of truth for the Channels ↔ Backend contract. Because the lanes are independent npm projects, they are **hand-mirrored** in `channels/src/contracts/` as plain TypeScript types — nothing catches drift automatically, so change both files in the same edit. `ai-data/src/contracts/ai.ts` owns the Backend ↔ AI contract.
+
+When changing a contract, follow the "Integration flow" section of [CONTRIBUTING.md](CONTRIBUTING.md): agree first, land it as its own small PR, then build both sides against it.
+
+**Open discussion point, not a decision:** the current AI contract has Gemini return `eligible` directly from a photo, and takes `exportStandardsSummary` as free text from the caller. A photo alone can't verify pesticide records, traceability, certificates, or MRLs, and free-text standards content is a prompt-injection surface if it ever comes from an untrusted caller. Worth a quick conversation before the contract is used more widely — not urgent for the demo.
 
 ## Where things live
 

@@ -4,3 +4,12 @@ dist/
 .env.local
 *.log
 .DS_Store
+
+# Local Claude Code harness settings (per-developer permission allowlists).
+# If we ever add project config the whole team needs, un-ignore that path
+# specifically rather than committing the whole directory.
+.claude/
+
+# Settled on npm, per lane — see CLAUDE.md § Project status.
+pnpm-lock.yaml
+yarn.lock
