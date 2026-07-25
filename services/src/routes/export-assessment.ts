@@ -13,11 +13,11 @@ exportAssessmentRoutes.post('/', async (c) => {
     return c.json({ error: parsed.error.flatten() }, 400);
   }
 
-  // TODO(Person B): POST the photo to the AI Service at
-  // `${AI_SERVICE_URL}/ai/assess-export` with an exportStandardsSummary for
-  // this crop, then layer Export Standards / International Market Prices on
-  // top of the result. Give the fetch an explicit timeout — a hung Gemini call
-  // must not hang the demo.
+  // TODO(Person B): POST crop/imageBase64/mimeType to the AI Service at
+  // `${AI_SERVICE_URL}/ai/assess-export`. The AI result is visual evidence and
+  // always requires human review; determine final eligibility here from trusted
+  // compliance rules, production records, and international pricing. Give the
+  // fetch an explicit timeout so a hung model call cannot hang the request.
   //
   // Shape is already contract-correct so Channels can build against it today;
   // only the values are placeholders.

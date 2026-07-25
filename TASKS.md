@@ -1,51 +1,47 @@
 # Tasks
 
-Living checklist per lane (see [CONTRIBUTING.md](CONTRIBUTING.md) for lane definitions and workflow). Check items off as PRs merge to `main`; add new items under the relevant lane as they're identified.
+Living checklist per lane (see [CONTRIBUTING.md](CONTRIBUTING.md) for lane definitions and workflow). Check items off as PRs merge to `main`; add new items under the relevant lane as they are identified.
 
 ## Person A — Channels/Frontend
 
-- [x] PWA scaffold (`channels/` — TanStack Start blank starter, builds clean)
-- [x] PWA config (`vite-plugin-pwa` manifest, static service worker, offline fallback, install icons, theme color)
-- [x] USSD menu flow (`/webhooks/ussd` — Africa's Talking form callback, session valuation, broker comparison)
-- [x] WhatsApp entry point (`/webhooks/whatsapp` — Meta verification/signature handling, conversation flow, Cloud API replies)
-- [x] API Gateway client integration (same-origin PWA proxies plus server-side USSD/WhatsApp client)
+- [x] PWA scaffold and offline/installable configuration.
+- [x] USSD valuation and broker-comparison flow.
+- [x] WhatsApp verification, signature validation, conversation flow, and Cloud API replies.
+- [x] API Gateway client integration.
 
 ## Person B — Core Backend
 
-- [x] API Gateway scaffold (`services/` — Hono, `/health` route)
-- [ ] Valuation Service (placeholder route in `services/src/routes/valuation.ts` — wire up the real Valuation Engine)
-- [ ] Export Assessment Service (placeholder route in `services/src/routes/export-assessment.ts` — wire up to AI Service + Export Standards)
+- [x] API Gateway scaffold (`services/` — Hono, `/health` route).
+- [ ] Valuation Service: replace the placeholder response with the real valuation engine and AI/Data evidence query.
+- [ ] Export Assessment Service: call the AI visual assessment, apply trusted compliance rules, and add international pricing.
 
 ## Person C — AI & Data
 
-- [x] AI Service scaffold (`ai-data/` — Gemini client + `/ai/assess-export` route, structured JSON output)
-- [ ] `GEMINI_API_KEY` provisioned and stored as a server-side secret (not committed)
-- [ ] Notification Service (`ai-data/src/notifications/` — SMS via Africa's Talking, WhatsApp Cloud API; deferred for the demo per the cut list below). The stubs now throw `NotificationConfigError` on missing credentials instead of silently resolving — a caller can no longer mistake a skipped send for a delivered one.
-- [x] PostgreSQL schema drafted (`ai-data/src/db/schema.ts`) — `transactions` (renamed from `verified_transactions`, now with a `status` lifecycle: `reported` → `pending_verification` → `verified`/`rejected`, plus `verifiedAt`/`verifiedBy`/`evidenceUrl`), `export_assessments`, and `market_data_points` (now carries `currency`, `unit`, `grade`, `variety`, `market`, `priceType`, `sourceRecordId`, `sourcePublishedAt`, `ingestedAt` so KAMIS/cooperative/verified-sale/export prices can't get silently mixed on incompatible bases). **Not wired to a database** — matches the demo cut list below (in-memory array instead).
-- [ ] Provision a real PostgreSQL instance and run `db:push`; wire Market Data aggregation (KAMIS, Cooperative Data, Verified Sales) — post-demo
+- [x] AI visual-assessment service with Gemini structured output.
+- [x] Remove caller-supplied standards text; use versioned trusted visual profiles.
+- [x] Treat photo analysis as a visual check requiring human review, not final export eligibility.
+- [x] Persist AI assessment metadata, model/profile versions, limitations, and image hashes.
+- [x] Load Person C credentials from an ignored server-side `.env`; deployment secrets must still be added to the chosen hosting platform.
+- [x] Notification Service: Africa's Talking SMS and WhatsApp Cloud API providers, delivery persistence, failures, timeouts, and `/notifications/send`.
+- [x] PostgreSQL connection, readiness check, Drizzle migration, and local Docker Compose setup.
+- [x] Market evidence aggregation: normalized KAMIS imports, generic cooperative/historical/international imports, and evidence queries with provenance.
+- [x] Transaction verification lifecycle; verified transactions atomically become valuation evidence.
+- [x] Unit coverage for configuration, KAMIS normalization, standards selection, and provider request contracts.
+- [ ] Configure a production `INTERNAL_API_TOKEN` and add all secrets to deployment secret storage.
+- [ ] Schedule or operator-automate KAMIS exports into `/data/market-data/kamis` if KAMIS provides a supported machine interface. Do not depend on an undocumented scraper.
+- [ ] Perform provider acceptance sends to team-owned SMS/WhatsApp recipients after test numbers and Meta template/session requirements are confirmed.
 
 ## Cross-lane / shared
 
-- [x] Root workspace baseline: `package.json` convenience scripts, `tsconfig.base.json`, root `.gitignore`, `.env.example`
-- [x] Package manager settled: **npm, per-lane, no root workspace**. Stub root `pnpm-lock.yaml` deleted; deps installed and all three lanes typecheck clean.
-- [x] Valuation API contract (Channels ↔ Backend) — `services/src/contracts/valuation.ts` (Zod, source of truth), hand-mirrored in `channels/src/contracts/valuation.ts` (plain types + `compareBrokerOffer`)
-- [x] Export Assessment contract (Channels ↔ Backend) — `services/src/contracts/export-assessment.ts` + mirror in `channels/`. Photo travels **inline as base64**; the old `aiAssessmentId` two-step upload shape is gone.
-- [x] Backend ↔ AI Service contract — `ai-data/src/contracts/ai.ts`; Gemini output is now schema-validated instead of cast
-- [x] Shared formatter/linter config — `services/` and `ai-data/` now ship the same ESLint (`typescript-eslint`) + Prettier setup as `channels/`. `npm run lint` passes clean in every lane. `npm run check` (Prettier) doesn't pass yet on the pre-existing route/contract files in `services/`/`ai-data/` — deliberately left unformatted rather than reformat files outside this change's scope; whoever next touches those files, run `npm run format` once.
-- [ ] Deferred for the demo: CI pipeline, test suite
-- [ ] **Discussion, not urgent:** the AI contract's `eligible` comes straight from Gemini reading a photo, and `exportStandardsSummary` is free text from the caller — a photo can't verify pesticide records/traceability/MRLs, and free text is a prompt-injection surface if the caller is ever untrusted. Worth a short conversation before the contract gets used more widely; not a demo blocker.
+- [x] Root workspace baseline and independent npm-per-lane setup.
+- [x] Channels ↔ Backend valuation/export contracts.
+- [x] Backend ↔ AI contract is schema-validated and limited to visual evidence.
+- [x] Shared formatter/linter configuration.
+- [x] Initial Person C test suite.
+- [ ] Implement Person B's two placeholder services against the completed Person C APIs.
+- [ ] Add repository CI for all three lanes.
+- [ ] Add an automated contract-drift check between `services/src/contracts/` and `channels/src/contracts/`.
 
 ### Contract drift warning
 
-The lanes are independent npm projects, so `channels/src/contracts/` is a **hand-written copy** of `services/src/contracts/`. No build step will catch divergence. Treat any contract change as a synchronous, all-three-people event.
-
-## Demo cut list
-
-Still deliberately deferred for the demo:
-
-- Notification Service (SMS / WhatsApp sending)
-- PostgreSQL provisioning; valuation reads from a committed fixture instead
-- Agent verification flow
-- Tests and CI
-
-Worth the twenty minutes anyway: fake the **evidence feedback loop** with an in-memory array so a verified sale visibly affects the next valuation. It's one of the four [design principles](docs/design-principles.md) and the most likely thing a judge asks about.
+The lanes are independent npm projects, so `channels/src/contracts/` is a hand-written copy of `services/src/contracts/`. No build step currently catches divergence. Treat any public contract change as a synchronous cross-lane change until the drift check is added.

@@ -4,23 +4,25 @@ Concrete technology choices per lane (see [CONTRIBUTING.md](../CONTRIBUTING.md) 
 
 ## Person A — Channels/Frontend
 
-- **TanStack Start** (React + Vite + TanStack Router) for the PWA — file-based routing, SSR, type-safe server functions.
-- `vite-plugin-pwa` for offline/installable PWA support.
-- USSD and WhatsApp are webhook endpoints (Africa's Talking POSTs to a URL for USSD; Meta's WhatsApp Cloud API does the same for WhatsApp) — implemented as TanStack Start server routes, so this lane owns one deployable for the whole channels layer. USSD supports valuation and broker comparison but hands photo-based export checks to the PWA. Immediate WhatsApp conversation replies stay in the Channels lane; asynchronous alerts remain the Notification Service's responsibility.
+- **TanStack Start** (React + Vite + TanStack Router) for the PWA.
+- `vite-plugin-pwa` for offline/installable support.
+- TanStack Start server routes for Africa's Talking USSD and Meta WhatsApp webhooks.
 
 ## Person B — Core Backend
 
-- **Node.js + TypeScript** for the API Gateway, Valuation Service, and Export Assessment Service — using **Hono** (lightweight, fast, works well as separate services or serverless).
-- **Zod** for request/response schemas — this is also the "contract" CONTRIBUTING.md's integration flow refers to between lanes.
+- **Node.js + TypeScript + Hono** for the API Gateway, valuation, and export-assessment services.
+- **Zod** request and response schemas as the public Channels ↔ Backend contract.
 
 ## Person C — AI & Data
 
-- **AI Service — Google Gemini API** for crop/export image assessment. The service sends the uploaded crop photo plus a prompt describing export standards to Gemini and gets back a structured assessment (eligibility, quality issues, compliance gaps) using Gemini's JSON/structured-output mode. Node/TypeScript via the official `@google/genai` SDK — keeps this lane in the same language as the rest of the stack (no separate Python/ML service needed).
-  - Auth via a `GEMINI_API_KEY` environment variable, obtained from Google AI Studio. **Server-side only** — never expose it to the PWA/USSD/WhatsApp clients.
-  - Model choice: start with a Flash-tier Gemini model for cost-effective per-image assessment; move to a Pro-tier model only if accuracy on ambiguous cases needs it. Check ai.google.dev for current model names before implementing — they change over time.
-- **PostgreSQL** for the data layer, with **Drizzle** or **Prisma** as the TypeScript ORM.
-- **Notification Service** — Node/TS, using the Africa's Talking SDK for SMS and the WhatsApp Cloud API for WhatsApp.
+- **Google Gemini via `@google/genai`** for structured crop-photo observations. The model is limited to visible checks from versioned, server-controlled profiles. It cannot establish final export eligibility, pesticide residues, certificates, traceability, or production-record compliance; results always require human review.
+- **PostgreSQL + Drizzle ORM** for assessment audit records, market evidence, transaction verification, and notification delivery state.
+- **KAMIS export adapter** plus normalized cooperative, verified-sale, historical, and international price inputs. KAMIS does not document a stable public API, so the service does not depend on an unsupported scraper.
+- **Africa's Talking REST API** for SMS and **Meta WhatsApp Cloud API** for WhatsApp notifications.
+- **Zod** for internal AI/Data request and response validation.
+
+Secrets are server-side environment variables only. Production deployments must configure `INTERNAL_API_TOKEN` as well as provider and database credentials.
 
 ## Why this shape
 
-Every lane ends up in TypeScript, so the team can read across lanes without a language switch, and the Valuation/Export Assessment contracts (Zod schemas) can be shared as types between Channels and Backend if useful.
+Every lane uses TypeScript, while the model is kept behind a narrow evidence contract. Deterministic application code owns compliance decisions, transaction verification, persistence, and provider delivery state.

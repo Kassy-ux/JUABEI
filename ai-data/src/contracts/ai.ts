@@ -1,27 +1,30 @@
 import { z } from 'zod';
 
-// Backend → AI Service contract. Frozen; see CONTRIBUTING.md § Integration flow.
-//
-// This lane owns this contract. services/ calls it from the Export Assessment
-// Service and layers Export Standards / International Market Prices on top of
-// the result, so the response here is deliberately AI-only: no pricing.
-
 export const assessExportRequestSchema = z.object({
-  imageBase64: z.string().min(1),
+  imageBase64: z.string().min(1).max(4_500_000),
   mimeType: z.enum(['image/jpeg', 'image/png', 'image/webp']),
-  crop: z.string().min(1),
-  // Plain-text summary of the standards the photo is judged against. Owned by
-  // this lane (one string per crop) and injected into the Gemini prompt.
-  exportStandardsSummary: z.string().min(1),
+  crop: z.string().min(1).max(120),
+  standardsProfileId: z.string().min(1).max(120).optional(),
 });
 
 export type AssessExportRequest = z.infer<typeof assessExportRequestSchema>;
 
-export const assessExportResponseSchema = z.object({
-  eligible: z.boolean(),
+export const visualAssessmentSchema = z.object({
+  visualStatus: z.enum(['passes_visual_check', 'needs_review', 'insufficient_image']),
   qualityIssues: z.array(z.string()),
-  complianceGaps: z.array(z.string()),
+  observations: z.array(z.string()),
+  limitations: z.array(z.string()).min(1),
   confidence: z.number().min(0).max(1),
+  requiresHumanReview: z.literal(true),
+});
+
+export type VisualAssessment = z.infer<typeof visualAssessmentSchema>;
+
+export const assessExportResponseSchema = visualAssessmentSchema.extend({
+  assessmentId: z.string().uuid(),
+  standardsProfileId: z.string(),
+  standardsProfileVersion: z.string(),
+  model: z.string(),
 });
 
 export type AssessExportResponse = z.infer<typeof assessExportResponseSchema>;

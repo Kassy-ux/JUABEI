@@ -1,44 +1,47 @@
 # System Architecture
 
-**Channels layer**
+## Channels layer
 
-Farmers reach the platform through one of three entry points:
+Farmers reach JuaBei through the PWA, USSD, or WhatsApp. All channels send valuation and export-assessment work through the API Gateway.
 
-- **PWA** (Progressive Web App)
-- **USSD**
-- **WhatsApp** (referenced in the user flow as an optional channel)
+## Backend services
 
-All channels route requests into the backend through a single **API Gateway**.
+- **API Gateway** — validates public channel requests and coordinates downstream services.
+- **Export Assessment Service** — combines trusted compliance rules and international prices with visual evidence from the AI Service.
+- **Valuation Service** — computes evidence-backed farm-gate pricing.
+- **AI Service** — records a limited visual review of uploaded crop photos; it never declares final regulatory eligibility.
+- **Notification Service** — sends asynchronous SMS and WhatsApp updates and persists delivery status.
 
-**Backend services**
+## Data layer
 
-- **API Gateway** — entry point for all channel traffic; routes requests to the appropriate service and returns responses (including SMS/WhatsApp notifications).
-- **Export Assessment Service** — evaluates crop/export data against export standards and international market prices, using the AI Service for assessment logic.
-- **Valuation Service** — computes fair farm-gate pricing using historical and current market data.
-- **AI Service** — supports the Export Assessment Service with automated evaluation of uploaded crop data/images.
-- **Notification Service** — sends outbound updates via SMS and WhatsApp, and tracks delivery status. It does not own transaction verification or evidence persistence — that belongs to the transaction/evidence workflow (Valuation Service → PostgreSQL).
+The AI/Data service normalizes market evidence into PostgreSQL:
 
-**External data sources**
+- KAMIS spreadsheet/export rows.
+- Cooperative submissions.
+- Verified farmer sales.
+- Historical and international sources.
 
-- **International Market Prices** — referenced by the Export Assessment Service.
-- **Export Standards** — compliance/eligibility rules referenced by the Export Assessment Service.
+Every price carries source, record ID, unit, currency, price type, publication time, and available location metadata. Reported transactions have an explicit verification lifecycle. Only a verified transaction becomes `verified_sales` evidence.
 
-**Data layer**
+Person C's data APIs and database are implemented. Person B's valuation route still needs to replace its fixture response with live evidence queries.
 
-- **Market Data** aggregation ingests and normalizes prices from three external sources:
-  - **KAMIS** (Kenya Agricultural Market Information System)
-  - **Cooperative Data**
-  - **Verified Sales**
-- Normalized data lands in **PostgreSQL**, which the Valuation Service reads from. (For the demo, `services/src/routes/valuation.ts` reads a committed price fixture instead of a live PostgreSQL feed — see TASKS.md.)
-
-```
+```text
 Channels (PWA / USSD / WhatsApp)
-        │
-        ▼
-   API Gateway
-   ├──► Export Assessment Service ──► AI Service
-   │         │                    └─► Export Standards / Int'l Market Prices
-   │         ▼
-   │    Notification Service ──► SMS / WhatsApp
-   └──► Valuation Service ──► PostgreSQL ◄── Market Data ◄── KAMIS / Cooperative Data / Verified Sales
+                 |
+                 v
+            API Gateway
+              /      \
+             v        v
+    Valuation       Export Assessment
+        |              |       |
+        v              v       v
+  AI/Data API     AI visual   Trusted compliance
+        |          evidence   + international price
+        v
+   PostgreSQL <--- KAMIS / Cooperative / Verified Sales
+        |
+        v
+ Notification Service ---> SMS / WhatsApp
 ```
+
+All internal `/ai`, `/data`, and `/notifications` routes require bearer authentication in production.

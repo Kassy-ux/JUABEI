@@ -1,16 +1,18 @@
 import { serve } from '@hono/node-server';
-import { Hono } from 'hono';
 
-import { aiRoutes } from './routes/ai.js';
+import { app } from './app.js';
+import { getConfig } from './config.js';
+import { closeDatabaseConnection } from './db/client.js';
 
-const app = new Hono();
-
-app.get('/health', (c) => c.json({ status: 'ok', service: 'ai-data' }));
-
-app.route('/ai', aiRoutes);
-
-const port = Number(process.env.PORT ?? 4100);
-
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`AI Service listening on http://localhost:${info.port}`);
+const config = getConfig();
+const server = serve({ fetch: app.fetch, port: config.AI_DATA_PORT }, (info) => {
+  console.log(`AI/Data Service listening on http://localhost:${info.port}`);
 });
+
+async function shutdown() {
+  server.close();
+  await closeDatabaseConnection();
+}
+
+process.once('SIGINT', shutdown);
+process.once('SIGTERM', shutdown);

@@ -3,15 +3,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "node --env-file-if-exists=../.env --import tsx --watch src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
+    "start": "node --env-file-if-exists=../.env dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write . && eslint --fix .",
     "check": "prettier --check .",
-    "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push"
+    "test": "node --import tsx --test test/*.test.ts",
+    "verify:database": "node --env-file-if-exists=../.env --import tsx scripts/verify-database.ts",
+    "db:generate": "node --env-file-if-exists=../.env node_modules/drizzle-kit/bin.cjs generate",
+    "db:migrate": "node --env-file-if-exists=../.env node_modules/drizzle-kit/bin.cjs migrate",
+    "db:push": "node --env-file-if-exists=../.env node_modules/drizzle-kit/bin.cjs push",
+    "db:studio": "node --env-file-if-exists=../.env node_modules/drizzle-kit/bin.cjs studio"
   },
   "dependencies": {
     "@google/genai": "^2.13.0",
