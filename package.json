@@ -1,0 +1,13 @@
+{
+  "name": "juabei",
+  "private": true,
+  "description": "Convenience scripts for running each lane independently. Each of channels/, services/, and ai-data/ is its own npm project with its own package.json and lockfile — run `npm install` inside each before using these.",
+  "scripts": {
+    "dev:channels": "npm run dev --prefix channels",
+    "dev:services": "npm run dev --prefix services",
+    "dev:ai-data": "npm run dev --prefix ai-data",
+    "build:channels": "npm run build --prefix channels",
+    "build:services": "npm run build --prefix services",
+    "build:ai-data": "npm run build --prefix ai-data"
+  }
+}
