@@ -1,16 +1,9 @@
 import { Hono } from 'hono';
-import { z } from 'zod';
+
+import { valuationRequestSchema } from '../contracts/valuation.js';
+import type { ValuationResponse } from '../contracts/valuation.js';
 
 export const valuationRoutes = new Hono();
-
-const valuationRequestSchema = z.object({
-  crop: z.string(),
-  variety: z.string().optional(),
-  quantityKg: z.number().positive(),
-  county: z.string(),
-  grade: z.string().optional(),
-  harvestStatus: z.string().optional(),
-});
 
 valuationRoutes.post('/', async (c) => {
   const body = await c.req.json().catch(() => null);
@@ -20,14 +13,20 @@ valuationRoutes.post('/', async (c) => {
     return c.json({ error: parsed.error.flatten() }, 400);
   }
 
-  // TODO: wire up the real Valuation Engine — pull evidence from KAMIS,
-  // Cooperative Data, Verified Sales, and Historical Sources (see
+  // TODO(Person B): wire up the real Valuation Engine — pull evidence from
+  // KAMIS, Cooperative Data, Verified Sales, and Historical Sources (see
   // docs/user-journey.md), then compute weighted median / confidence / range.
-  return c.json({
-    weightedMedian: null,
-    confidenceScore: null,
-    priceRange: null,
+  // For the demo this reads from a committed price fixture, not a live feed.
+  //
+  // Shape is already contract-correct so Channels can build against it today;
+  // only the numbers are placeholders.
+  const response: ValuationResponse = {
+    weightedMedian: 0,
+    priceRange: { low: 0, high: 0 },
+    confidenceScore: 0,
+    estimatedValue: 0,
     evidence: [],
-    message: 'Valuation Service placeholder — not yet implemented',
-  });
+  };
+
+  return c.json(response);
 });

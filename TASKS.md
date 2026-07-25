@@ -26,7 +26,25 @@ Living checklist per lane (see [CONTRIBUTING.md](CONTRIBUTING.md) for lane defin
 ## Cross-lane / shared
 
 - [x] Root workspace baseline: `package.json` convenience scripts, `tsconfig.base.json`, root `.gitignore`, `.env.example`
-- [ ] Agree on shared formatter/linter config (each lane currently has its own — channels/ ships ESLint + Prettier from the scaffold; services/ and ai-data/ don't have one yet)
-- [ ] CI pipeline (build + test gate on `main`)
-- [ ] Valuation API contract (Channels ↔ Backend)
-- [ ] Export Assessment contract (Backend ↔ AI Service)
+- [x] Package manager settled: **npm, per-lane, no root workspace**. Stub root `pnpm-lock.yaml` deleted; deps installed and all three lanes typecheck clean.
+- [x] Valuation API contract (Channels ↔ Backend) — `services/src/contracts/valuation.ts` (Zod, source of truth), hand-mirrored in `channels/src/contracts/valuation.ts` (plain types + `compareBrokerOffer`)
+- [x] Export Assessment contract (Channels ↔ Backend) — `services/src/contracts/export-assessment.ts` + mirror in `channels/`. Photo travels **inline as base64**; the old `aiAssessmentId` two-step upload shape is gone.
+- [x] Backend ↔ AI Service contract — `ai-data/src/contracts/ai.ts`; Gemini output is now schema-validated instead of cast
+- [ ] Agree on shared formatter/linter config (channels/ ships ESLint + Prettier from the scaffold; services/ and ai-data/ don't have one yet)
+- [ ] Deferred for the demo: CI pipeline, test suite
+
+### Contract drift warning
+
+The lanes are independent npm projects, so `channels/src/contracts/` is a **hand-written copy** of `services/src/contracts/`. No build step will catch divergence. Treat any contract change as a synchronous, all-three-people event.
+
+## Demo cut list
+
+Deliberately not building for the demo — don't quietly start these:
+
+- USSD and WhatsApp channels
+- Notification Service (SMS / WhatsApp sending)
+- PostgreSQL provisioning; valuation reads from a committed fixture instead
+- Agent verification flow
+- Tests and CI
+
+Worth the twenty minutes anyway: fake the **evidence feedback loop** with an in-memory array so a verified sale visibly affects the next valuation. It's one of the four [design principles](docs/design-principles.md) and the most likely thing a judge asks about.

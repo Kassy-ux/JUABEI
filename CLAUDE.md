@@ -4,7 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-JuaBei is currently in the planning/documentation stage — there is no source code, build tooling, or test suite in this repo yet. The tech stack is decided (see [docs/tech-stack.md](docs/tech-stack.md)) but not yet scaffolded.
+All three lanes are scaffolded and typecheck clean. There is **no test suite and no CI** yet — deliberately deferred (see [TASKS.md](TASKS.md)).
+
+- `channels/` — TanStack Start PWA, one index route. No `vite-plugin-pwa` yet; no USSD/WhatsApp routes yet.
+- `services/` — Hono API Gateway on `:4000` with `/health`, `/valuation`, `/export-assessment`. Both service routes validate against the frozen contracts but return placeholder values.
+- `ai-data/` — Hono on `:4100` with `/health` and `/ai/assess-export`. The Gemini call is real and returns validated structured output. Drizzle schema is drafted but no database is provisioned. SMS/WhatsApp senders are stubs that throw.
+
+Each lane is an independent npm project with its own `package-lock.json` — **npm, not pnpm**, and no workspace at the root. Run `npm install` inside each lane.
+
+## Cross-lane contracts
+
+The Zod schemas in `services/src/contracts/` are the source of truth for the Channels ↔ Backend contract. Because the lanes are independent npm projects, they are **hand-mirrored** in `channels/src/contracts/` as plain TypeScript types — nothing catches drift automatically, so change both files in the same edit. `ai-data/src/contracts/ai.ts` owns the Backend ↔ AI contract.
+
+When changing a contract, follow the "Integration flow" section of [CONTRIBUTING.md](CONTRIBUTING.md): agree first, land it as its own small PR, then build both sides against it.
 
 ## Where things live
 

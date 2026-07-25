@@ -1,18 +1,9 @@
 import { Hono } from 'hono';
-import { z } from 'zod';
+
+import { exportAssessmentRequestSchema } from '../contracts/export-assessment.js';
+import type { ExportAssessmentResponse } from '../contracts/export-assessment.js';
 
 export const exportAssessmentRoutes = new Hono();
-
-const exportAssessmentRequestSchema = z.object({
-  crop: z.string(),
-  fertilizerOrManure: z.string().optional(),
-  cropProtection: z.string().optional(),
-  harvestDetails: z.string().optional(),
-  productionRecords: z.string().optional(),
-  // Photo(s) are sent to the AI Service (see ai-data/); this endpoint expects
-  // an already-computed AI assessment reference, not raw image bytes.
-  aiAssessmentId: z.string().optional(),
-});
 
 exportAssessmentRoutes.post('/', async (c) => {
   const body = await c.req.json().catch(() => null);
@@ -22,12 +13,21 @@ exportAssessmentRoutes.post('/', async (c) => {
     return c.json({ error: parsed.error.flatten() }, 400);
   }
 
-  // TODO: call the AI Service (ai-data/) for the export assessment, then
-  // compare against Export Standards / International Market Prices.
-  return c.json({
-    eligible: null,
-    missingRequirements: [],
+  // TODO(Person B): POST the photo to the AI Service at
+  // `${AI_SERVICE_URL}/ai/assess-export` with an exportStandardsSummary for
+  // this crop, then layer Export Standards / International Market Prices on
+  // top of the result. Give the fetch an explicit timeout — a hung Gemini call
+  // must not hang the demo.
+  //
+  // Shape is already contract-correct so Channels can build against it today;
+  // only the values are placeholders.
+  const response: ExportAssessmentResponse = {
+    eligible: false,
+    qualityIssues: [],
+    complianceGaps: [],
+    confidence: 0,
     internationalMarketPrice: null,
-    message: 'Export Assessment Service placeholder — not yet implemented',
-  });
+  };
+
+  return c.json(response);
 });

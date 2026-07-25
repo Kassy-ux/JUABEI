@@ -1,16 +1,9 @@
 import { Hono } from 'hono';
-import { z } from 'zod';
 
+import { assessExportRequestSchema } from '../contracts/ai.js';
 import { assessExportPhoto } from '../ai/gemini.js';
 
 export const aiRoutes = new Hono();
-
-const assessExportRequestSchema = z.object({
-  imageBase64: z.string(),
-  mimeType: z.string(),
-  crop: z.string(),
-  exportStandardsSummary: z.string(),
-});
 
 aiRoutes.post('/assess-export', async (c) => {
   const body = await c.req.json().catch(() => null);
