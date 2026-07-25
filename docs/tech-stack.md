@@ -6,7 +6,7 @@ Concrete technology choices per lane (see [CONTRIBUTING.md](../CONTRIBUTING.md) 
 
 - **TanStack Start** (React + Vite + TanStack Router) for the PWA — file-based routing, SSR, type-safe server functions.
 - `vite-plugin-pwa` for offline/installable PWA support.
-- USSD and WhatsApp are webhook endpoints (Africa's Talking POSTs to a URL for USSD; Meta's WhatsApp Cloud API does the same for WhatsApp) — implemented as TanStack Start server routes, so this lane owns one deployable for the whole channels layer.
+- USSD and WhatsApp are webhook endpoints (Africa's Talking POSTs to a URL for USSD; Meta's WhatsApp Cloud API does the same for WhatsApp) — implemented as TanStack Start server routes, so this lane owns one deployable for the whole channels layer. USSD supports valuation and broker comparison but hands photo-based export checks to the PWA. Immediate WhatsApp conversation replies stay in the Channels lane; asynchronous alerts remain the Notification Service's responsibility.
 
 ## Person B — Core Backend
 

@@ -38,12 +38,9 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // TanStack Start renders on the server too, and vite-plugin-pwa's
-    // virtual module only exists client-side, so this must stay inside an
-    // effect rather than at module scope.
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
-    void import('virtual:pwa-register').then(({ registerSW }) => {
-      registerSW({ immediate: true })
+    void navigator.serviceWorker.register('/sw.js').catch((error: unknown) => {
+      console.error('JuaBei service worker registration failed', error)
     })
   }, [])
 

@@ -10,33 +10,89 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiExportAssessmentRouteImport } from './routes/api/export-assessment'
+import { Route as ApiValuationRouteImport } from './routes/api/valuation'
+import { Route as WebhooksUssdRouteImport } from './routes/webhooks/ussd'
+import { Route as WebhooksWhatsappRouteImport } from './routes/webhooks/whatsapp'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiExportAssessmentRoute = ApiExportAssessmentRouteImport.update({
+  id: '/api/export-assessment',
+  path: '/api/export-assessment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiValuationRoute = ApiValuationRouteImport.update({
+  id: '/api/valuation',
+  path: '/api/valuation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WebhooksUssdRoute = WebhooksUssdRouteImport.update({
+  id: '/webhooks/ussd',
+  path: '/webhooks/ussd',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WebhooksWhatsappRoute = WebhooksWhatsappRouteImport.update({
+  id: '/webhooks/whatsapp',
+  path: '/webhooks/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/export-assessment': typeof ApiExportAssessmentRoute
+  '/api/valuation': typeof ApiValuationRoute
+  '/webhooks/ussd': typeof WebhooksUssdRoute
+  '/webhooks/whatsapp': typeof WebhooksWhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/export-assessment': typeof ApiExportAssessmentRoute
+  '/api/valuation': typeof ApiValuationRoute
+  '/webhooks/ussd': typeof WebhooksUssdRoute
+  '/webhooks/whatsapp': typeof WebhooksWhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/export-assessment': typeof ApiExportAssessmentRoute
+  '/api/valuation': typeof ApiValuationRoute
+  '/webhooks/ussd': typeof WebhooksUssdRoute
+  '/webhooks/whatsapp': typeof WebhooksWhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/api/export-assessment'
+    | '/api/valuation'
+    | '/webhooks/ussd'
+    | '/webhooks/whatsapp'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/api/export-assessment'
+    | '/api/valuation'
+    | '/webhooks/ussd'
+    | '/webhooks/whatsapp'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/export-assessment'
+    | '/api/valuation'
+    | '/webhooks/ussd'
+    | '/webhooks/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiExportAssessmentRoute: typeof ApiExportAssessmentRoute
+  ApiValuationRoute: typeof ApiValuationRoute
+  WebhooksUssdRoute: typeof WebhooksUssdRoute
+  WebhooksWhatsappRoute: typeof WebhooksWhatsappRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +104,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/export-assessment': {
+      id: '/api/export-assessment'
+      path: '/api/export-assessment'
+      fullPath: '/api/export-assessment'
+      preLoaderRoute: typeof ApiExportAssessmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/valuation': {
+      id: '/api/valuation'
+      path: '/api/valuation'
+      fullPath: '/api/valuation'
+      preLoaderRoute: typeof ApiValuationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/webhooks/ussd': {
+      id: '/webhooks/ussd'
+      path: '/webhooks/ussd'
+      fullPath: '/webhooks/ussd'
+      preLoaderRoute: typeof WebhooksUssdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/webhooks/whatsapp': {
+      id: '/webhooks/whatsapp'
+      path: '/webhooks/whatsapp'
+      fullPath: '/webhooks/whatsapp'
+      preLoaderRoute: typeof WebhooksWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiExportAssessmentRoute: ApiExportAssessmentRoute,
+  ApiValuationRoute: ApiValuationRoute,
+  WebhooksUssdRoute: WebhooksUssdRoute,
+  WebhooksWhatsappRoute: WebhooksWhatsappRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -11,11 +11,8 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
     VitePWA({
-      registerType: 'autoUpdate',
-      // TanStack Start has no static index.html for Vite to transform, so
-      // the plugin's automatic <script>/<link> injection doesn't apply —
-      // the manifest link and SW registration are added by hand instead
-      // (see src/routes/__root.tsx).
+      // The plugin owns the manifest. public/sw.js provides the service worker
+      // because generateSW does not run reliably in Start's client+SSR build.
       injectRegister: false,
       manifest: {
         name: 'JuaBei',
@@ -26,11 +23,16 @@ const config = defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
+        scope: '/',
         icons: [
-          // TODO: add real 192x192 / 512x512 PNG icons under public/ before
-          // shipping — these paths are placeholders so the manifest is valid.
           { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
         ],
       },
     }),
