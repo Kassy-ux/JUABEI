@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#166534" />
+    <title>JuaBei is offline</title>
+    <style>
+      :root {
+        color: #17221a;
+        background: #f4f7f1;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+      }
+      body {
+        display: grid;
+        min-height: 100dvh;
+        margin: 0;
+        padding: 1rem;
+        place-items: center;
+      }
+      main {
+        width: min(32rem, 100%);
+        padding: 1.5rem;
+        border: 1px solid #d7dfd6;
+        border-radius: 14px;
+        background: white;
+      }
+      h1 {
+        margin: 0 0 0.75rem;
+        font-size: 2rem;
+        letter-spacing: -0.04em;
+      }
+      p {
+        margin: 0 0 1.25rem;
+        color: #58645c;
+        line-height: 1.55;
+      }
+      button {
+        min-height: 3rem;
+        padding: 0.75rem 1rem;
+        border: 0;
+        border-radius: 10px;
+        color: white;
+        background: #166534;
+        font: inherit;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>You are offline.</h1>
+      <p>
+        Reconnect to check current crop prices. Any form already open can stay
+        on screen.
+      </p>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+  </body>
+</html>

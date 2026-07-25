@@ -8,27 +8,27 @@
 // JSON; on demo-venue wifi that reads as a broken app.
 
 export type ExportAssessmentRequest = {
-  crop: string;
-  quantityKg: number;
-  imageBase64: string;
-  mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
-  fertilizerOrManure?: string;
-  cropProtection?: string;
-  harvestDetails?: string;
-  productionRecords?: string;
-};
+  crop: string
+  quantityKg: number
+  imageBase64: string
+  mimeType: 'image/jpeg' | 'image/png' | 'image/webp'
+  fertilizerOrManure?: string
+  cropProtection?: string
+  harvestDetails?: string
+  productionRecords?: string
+}
 
 export type InternationalMarketPrice = {
-  pricePerKg: number;
-  currency: string; // ISO 4217, e.g. 'USD'
-  estimatedExportValue: number;
-};
+  pricePerKg: number
+  currency: string // ISO 4217, e.g. 'USD'
+  estimatedExportValue: number
+}
 
 export type ExportAssessmentResponse = {
-  eligible: boolean;
-  qualityIssues: string[];
-  complianceGaps: string[];
-  confidence: number; // 0..1
+  eligible: boolean
+  qualityIssues: string[]
+  complianceGaps: string[]
+  confidence: number // 0..1
   // null when not export-eligible — there is no price to show.
-  internationalMarketPrice: InternationalMarketPrice | null;
-};
+  internationalMarketPrice: InternationalMarketPrice | null
+}

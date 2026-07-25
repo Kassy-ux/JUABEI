@@ -5,10 +5,10 @@ Living checklist per lane (see [CONTRIBUTING.md](CONTRIBUTING.md) for lane defin
 ## Person A — Channels/Frontend
 
 - [x] PWA scaffold (`channels/` — TanStack Start blank starter, builds clean)
-- [x] PWA config (`vite-plugin-pwa`, manifest, theme color, SW registration in `__root.tsx`) — **caveat:** the build doesn't currently emit an actual `sw.js`; `vite-plugin-pwa`'s `generateSW` hook doesn't appear to fire under TanStack Start's Vite Environments (client+SSR) build. Manifest generation and the registration code path both work and are verified by build output. Real icon PNGs (`public/pwa-192x192.png`, `pwa-512x512.png`) are still placeholders too.
-- [ ] USSD menu flow (server route)
-- [ ] WhatsApp entry point (server route)
-- [ ] API Gateway client integration
+- [x] PWA config (`vite-plugin-pwa` manifest, static service worker, offline fallback, install icons, theme color)
+- [x] USSD menu flow (`/webhooks/ussd` — Africa's Talking form callback, session valuation, broker comparison)
+- [x] WhatsApp entry point (`/webhooks/whatsapp` — Meta verification/signature handling, conversation flow, Cloud API replies)
+- [x] API Gateway client integration (same-origin PWA proxies plus server-side USSD/WhatsApp client)
 
 ## Person B — Core Backend
 
@@ -41,9 +41,8 @@ The lanes are independent npm projects, so `channels/src/contracts/` is a **hand
 
 ## Demo cut list
 
-Deliberately not building for the demo — don't quietly start these:
+Still deliberately deferred for the demo:
 
-- USSD and WhatsApp channels
 - Notification Service (SMS / WhatsApp sending)
 - PostgreSQL provisioning; valuation reads from a committed fixture instead
 - Agent verification flow

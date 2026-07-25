@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 All three lanes are scaffolded and typecheck clean. There is **no test suite and no CI** yet — deliberately deferred (see [TASKS.md](TASKS.md)).
 
-- `channels/` — TanStack Start PWA, one index route. `vite-plugin-pwa` is configured (manifest + SW registration); the production build doesn't yet emit an actual `sw.js` — the plugin's `generateSW` hook doesn't appear to fire under TanStack Start's Vite Environments (client+SSR) build. Icon PNGs under `public/` are still placeholders. No USSD/WhatsApp routes yet.
+- `channels/` — TanStack Start PWA with a farmer valuation/export flow, same-origin API Gateway proxies, an Africa's Talking USSD callback, and a Meta WhatsApp webhook. `vite-plugin-pwa` owns the manifest; a static `public/sw.js` provides runtime caching and the offline fallback because the plugin's `generateSW` hook does not fire reliably under TanStack Start's client+SSR Vite Environments build.
 - `services/` — Hono API Gateway on `:4000` with `/health`, `/valuation`, `/export-assessment`. Both service routes validate against the frozen contracts but return placeholder values.
 - `ai-data/` — Hono on `:4100` with `/health` and `/ai/assess-export`. The Gemini call is real and returns validated structured output. Drizzle schema is drafted (and includes a `status` lifecycle on transactions, plus richer market-data fields — currency, unit, price type, source) but no database is provisioned; the demo fakes persistence with an in-memory array instead (see [TASKS.md](TASKS.md)). SMS/WhatsApp senders are stubs that throw (including on missing credentials — they never resolve silently).
 
