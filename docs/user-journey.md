@@ -56,7 +56,7 @@ This is the path a farmer follows when checking whether their crop qualifies for
 
 - **Check Export Eligibility?**
   - **Yes** → **Upload Crop Photos** → **Enter Export Information** (Fertilizer/Manure, Crop Protection, Harvest Details, Production Records) → **AI Export Assessment** → **Export Ready?**
-    - **Yes** → **Show International Market Price** (Price per Kg, Estimated Export Value, Export Opportunities) → **Farmer Decides to Export** → **Verified Transaction Added to Evidence Database**
+    - **Yes** → **Show International Market Price** (Price per Kg, Estimated Export Value, Export Opportunities) → **Farmer Decides to Export** → **Report Export Sale** (buyer, quantity, price, currency, date, evidence) → **Agent Verification** → **Verified Transaction Added to Evidence Database**
     - **No** → **Show Missing Requirements** (Quality Issues, Compliance Gaps) → **Improve Crop and Reassess**
 
 ### Feedback Loop

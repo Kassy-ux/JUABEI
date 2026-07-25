@@ -16,7 +16,7 @@ All channels route requests into the backend through a single **API Gateway**.
 - **Export Assessment Service** — evaluates crop/export data against export standards and international market prices, using the AI Service for assessment logic.
 - **Valuation Service** — computes fair farm-gate pricing using historical and current market data.
 - **AI Service** — supports the Export Assessment Service with automated evaluation of uploaded crop data/images.
-- **Notification Service** — sends outbound updates via SMS and WhatsApp, and logs verified data back to storage.
+- **Notification Service** — sends outbound updates via SMS and WhatsApp, and tracks delivery status. It does not own transaction verification or evidence persistence — that belongs to the transaction/evidence workflow (Valuation Service → PostgreSQL).
 
 **External data sources**
 
@@ -25,11 +25,11 @@ All channels route requests into the backend through a single **API Gateway**.
 
 **Data layer**
 
-- **PostgreSQL** — primary data store, feeding a **Market Data** aggregation layer.
-- **Market Data** draws from three sources:
+- **Market Data** aggregation ingests and normalizes prices from three external sources:
   - **KAMIS** (Kenya Agricultural Market Information System)
   - **Cooperative Data**
   - **Verified Sales**
+- Normalized data lands in **PostgreSQL**, which the Valuation Service reads from. (For the demo, `services/src/routes/valuation.ts` reads a committed price fixture instead of a live PostgreSQL feed — see TASKS.md.)
 
 ```
 Channels (PWA / USSD / WhatsApp)
@@ -40,5 +40,5 @@ Channels (PWA / USSD / WhatsApp)
    │         │                    └─► Export Standards / Int'l Market Prices
    │         ▼
    │    Notification Service ──► SMS / WhatsApp
-   └──► Valuation Service ──► PostgreSQL ──► Market Data ──► KAMIS / Cooperative Data / Verified Sales
+   └──► Valuation Service ──► PostgreSQL ◄── Market Data ◄── KAMIS / Cooperative Data / Verified Sales
 ```
