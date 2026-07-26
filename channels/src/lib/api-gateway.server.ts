@@ -2,6 +2,7 @@ import type {
   ExportAssessmentRequest,
   ExportAssessmentResponse,
 } from '../contracts/export-assessment'
+import type { MarketScope, MarketsResponse } from '../contracts/markets'
 import type {
   ValuationRequest,
   ValuationResponse,
@@ -64,10 +65,57 @@ async function postJson<TResponse>(
   return body as TResponse
 }
 
+async function getJson<TResponse>(
+  path: string,
+  parameters: Record<string, string>,
+): Promise<TResponse> {
+  const url = new URL(`${gatewayUrl()}${path}`)
+  for (const [key, value] of Object.entries(parameters)) {
+    url.searchParams.set(key, value)
+  }
+
+  let response: Response
+  try {
+    response = await fetch(url, {
+      headers: { accept: 'application/json' },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
+  } catch (error) {
+    throw new ApiGatewayError(
+      'The market directory is currently unavailable.',
+      503,
+      error,
+    )
+  }
+
+  const body = (await response.json().catch(() => null)) as unknown
+  if (!response.ok) {
+    throw new ApiGatewayError(
+      'The market directory could not complete this request.',
+      response.status,
+      body,
+    )
+  }
+
+  return body as TResponse
+}
+
 export function requestValuation(payload: ValuationRequest) {
   return postJson<ValuationResponse>('/valuation', payload)
 }
 
 export function requestExportAssessment(payload: ExportAssessmentRequest) {
   return postJson<ExportAssessmentResponse>('/export-assessment', payload)
+}
+
+export function requestMarkets(
+  crop: string,
+  quantityKg: number,
+  scope: MarketScope,
+) {
+  return getJson<MarketsResponse>('/markets', {
+    crop,
+    quantityKg: String(quantityKg),
+    scope,
+  })
 }

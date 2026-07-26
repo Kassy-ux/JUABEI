@@ -5,6 +5,7 @@ import type {
   ExportAssessmentRequest,
   ExportAssessmentResponse,
 } from '../contracts/export-assessment'
+import type { MarketScope, MarketsResponse } from '../contracts/markets'
 import type {
   BrokerComparison,
   ValuationRequest,
@@ -52,7 +53,7 @@ function formatMoney(value: number, currency = 'KES') {
   return new Intl.NumberFormat('en-KE', {
     style: 'currency',
     currency,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: currency === 'KES' ? 0 : 2,
   }).format(value)
 }
 
@@ -78,6 +79,12 @@ function Home() {
   )
   const [assessmentError, setAssessmentError] = useState('')
   const [isAssessing, setIsAssessing] = useState(false)
+  const [marketScope, setMarketScope] = useState<MarketScope>('local')
+  const [marketResults, setMarketResults] = useState<MarketsResponse | null>(
+    null,
+  )
+  const [marketsError, setMarketsError] = useState('')
+  const [isLoadingMarkets, setIsLoadingMarkets] = useState(false)
 
   useEffect(() => {
     const updateConnection = () => setIsOnline(navigator.onLine)
@@ -110,6 +117,8 @@ function Home() {
     setValuationError('')
     setValuation(null)
     setBrokerComparison(null)
+    setMarketResults(null)
+    setMarketsError('')
 
     try {
       const result = await postJson<ValuationResponse>(
@@ -132,6 +141,37 @@ function Home() {
     const offer = Number(brokerOffer)
     if (!Number.isFinite(offer) || offer <= 0) return
     setBrokerComparison(compareBrokerOffer(offer, valuation.priceRange))
+  }
+
+  async function loadMarkets(scope: MarketScope) {
+    setMarketScope(scope)
+    setIsLoadingMarkets(true)
+    setMarketsError('')
+
+    const parameters = new URLSearchParams({
+      crop: valuationForm.crop,
+      quantityKg: String(valuationForm.quantityKg),
+      scope,
+    })
+
+    try {
+      const response = await fetch(`/api/valuation?${parameters}`)
+      const body = (await response.json().catch(() => null)) as
+        MarketsResponse | ApiErrorBody | null
+      if (!response.ok) {
+        throw new Error(
+          (body as ApiErrorBody | null)?.error ?? 'Unable to load markets.',
+        )
+      }
+      setMarketResults(body as MarketsResponse)
+    } catch (error) {
+      setMarketResults(null)
+      setMarketsError(
+        error instanceof Error ? error.message : 'Unable to load markets.',
+      )
+    } finally {
+      setIsLoadingMarkets(false)
+    }
   }
 
   async function selectImage(event: React.ChangeEvent<HTMLInputElement>) {
@@ -415,6 +455,97 @@ function Home() {
               </span>
             </div>
           )}
+
+          <div className="market-explorer">
+            <div className="market-explorer-heading">
+              <div>
+                <h3>Where could you sell?</h3>
+                <p>
+                  Compare a minimal set of indicative local and export market
+                  prices for your quantity.
+                </p>
+              </div>
+              {!marketResults && (
+                <button
+                  className="secondary-button"
+                  type="button"
+                  disabled={isLoadingMarkets}
+                  onClick={() => loadMarkets('local')}
+                >
+                  {isLoadingMarkets ? 'Loading markets...' : 'Explore markets'}
+                </button>
+              )}
+            </div>
+
+            {marketResults && (
+              <>
+                <div className="market-tabs" role="tablist">
+                  {(['local', 'export'] as const).map((scope) => (
+                    <button
+                      aria-selected={marketScope === scope}
+                      className={marketScope === scope ? 'is-active' : ''}
+                      key={scope}
+                      role="tab"
+                      type="button"
+                      disabled={isLoadingMarkets}
+                      onClick={() => loadMarkets(scope)}
+                    >
+                      {scope === 'local' ? 'Local markets' : 'Export markets'}
+                    </button>
+                  ))}
+                </div>
+
+                {marketResults.markets.length > 0 ? (
+                  <div className="market-grid">
+                    {marketResults.markets.map((market) => (
+                      <article className="market-card" key={market.id}>
+                        <div>
+                          <span>{market.location}</span>
+                          <strong>{market.name}</strong>
+                        </div>
+                        <dl>
+                          <div>
+                            <dt>Indicative price</dt>
+                            <dd>
+                              {formatMoney(market.pricePerKg, market.currency)}
+                              /kg
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Value for your quantity</dt>
+                            <dd>
+                              {formatMoney(
+                                market.estimatedValue,
+                                market.currency,
+                              )}
+                            </dd>
+                          </div>
+                        </dl>
+                        <small>
+                          {market.priceType.replace('_', ' ')} · {market.source}{' '}
+                          ·{' '}
+                          {new Date(market.updatedAt).toLocaleDateString(
+                            'en-KE',
+                          )}
+                        </small>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="notice">
+                    No indicative demo markets are configured for this crop.
+                  </p>
+                )}
+                <p className="market-notice">{marketResults.dataNotice}</p>
+              </>
+            )}
+
+            {marketsError && (
+              <p className="form-error" role="alert">
+                {marketsError}
+              </p>
+            )}
+          </div>
         </section>
       )}
 
