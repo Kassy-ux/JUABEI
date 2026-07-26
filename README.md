@@ -8,6 +8,7 @@ JuaBei is a multi-channel platform that helps farmers get an evidence-backed cro
 - [Tech Stack](docs/tech-stack.md)
 - [User Journey](docs/user-journey.md)
 - [Design Principles](docs/design-principles.md)
+- [USSD Integration 101](docs/ussd-integration-101.md)
 - [AI & Data Service](ai-data/README.md)
 - [Contributing / Team Workflow](CONTRIBUTING.md)
 - [Tasks](TASKS.md)
