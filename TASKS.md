@@ -17,7 +17,7 @@ Living checklist per lane (see [CONTRIBUTING.md](CONTRIBUTING.md) for lane defin
 
 ## Person C — AI & Data
 
-- [x] AI visual-assessment service with Gemini structured output.
+- [x] AI visual-assessment service with Claude (Anthropic API) structured output.
 - [x] Remove caller-supplied standards text; use versioned trusted visual profiles.
 - [x] Treat photo analysis as a visual check requiring human review, not final export eligibility.
 - [x] Persist AI assessment metadata, model/profile versions, limitations, and image hashes.

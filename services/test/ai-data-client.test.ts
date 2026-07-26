@@ -13,7 +13,7 @@ const validResponse = {
   assessmentId: 'f67060d4-5073-4ea6-bc44-65ab2230f3da',
   standardsProfileId: 'maize-visual',
   standardsProfileVersion: '2026-07-01',
-  model: 'gemini-3.5-flash',
+  model: 'claude-opus-5',
 } as const;
 
 test('Gateway sends the narrow visual-assessment contract', async () => {

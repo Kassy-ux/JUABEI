@@ -79,6 +79,11 @@ Conversation state is currently held in memory for the demo. A multi-instance
 or serverless production deployment must replace the maps with shared,
 expiring storage.
 
+See the
+[step-by-step WhatsApp integration guide](../docs/whatsapp-integration.md) for
+the complete Meta dashboard, local tunnel, phone number, testing, and
+troubleshooting procedure.
+
 ## Verification
 
 ```bash

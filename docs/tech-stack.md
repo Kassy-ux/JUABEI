@@ -15,7 +15,7 @@ Concrete technology choices per lane (see [CONTRIBUTING.md](../CONTRIBUTING.md) 
 
 ## Person C — AI & Data
 
-- **Google Gemini via `@google/genai`** for structured crop-photo observations. The model is limited to visible checks from versioned, server-controlled profiles. It cannot establish final export eligibility, pesticide residues, certificates, traceability, or production-record compliance; results always require human review.
+- **Claude (Anthropic API) via `@anthropic-ai/sdk`** for structured crop-photo observations, using vision input and schema-constrained structured outputs. The model is limited to visible checks from versioned, server-controlled profiles. It cannot establish final export eligibility, pesticide residues, certificates, traceability, or production-record compliance; results always require human review.
 - **PostgreSQL + Drizzle ORM** for assessment audit records, market evidence, transaction verification, and notification delivery state.
 - **KAMIS export adapter** plus normalized cooperative, verified-sale, historical, and international price inputs. KAMIS does not document a stable public API, so the service does not depend on an unsupported scraper.
 - **Africa's Talking REST API** for SMS and **Meta WhatsApp Cloud API** for WhatsApp notifications.

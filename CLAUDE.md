@@ -6,7 +6,7 @@ Repository guidance for coding agents.
 
 - `channels/` — completed Person A PWA, USSD, WhatsApp, and API Gateway client work.
 - `services/` — Hono API Gateway on `:4000`. Valuation and export assessment validate the public contracts but still return placeholder values; these are Person B's remaining implementation tasks.
-- `ai-data/` — Person C service on `:4100`: trusted-profile Gemini visual review, PostgreSQL persistence and migrations, market evidence imports/queries, verified-sale lifecycle, and SMS/WhatsApp notification delivery.
+- `ai-data/` — Person C service on `:4100`: trusted-profile Claude (Anthropic API) visual review, PostgreSQL persistence and migrations, market evidence imports/queries, verified-sale lifecycle, and SMS/WhatsApp notification delivery.
 
 Each lane is an independent npm project with its own `package-lock.json`. Use npm, not pnpm, and run installs/checks inside each lane. The AI/Data scripts automatically load the ignored root `.env`.
 
