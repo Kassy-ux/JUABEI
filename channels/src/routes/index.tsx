@@ -30,6 +30,51 @@ const initialValuation: ValuationRequest = {
   harvestStatus: '',
 }
 
+type ExportDetails = Pick<
+  ExportAssessmentRequest,
+  | 'fertilizerOrManure'
+  | 'cropProtection'
+  | 'harvestDetails'
+  | 'productionRecords'
+>
+
+const completeDemo = {
+  valuation: {
+    crop: 'maize',
+    variety: 'H614D',
+    quantityKg: 500,
+    county: 'Nakuru',
+    grade: 'grade-1',
+    harvestStatus: 'harvested',
+  } satisfies ValuationRequest,
+  exportDetails: {
+    fertilizerOrManure:
+      'Composted manure applied before planting; dates recorded.',
+    cropProtection:
+      'Approved crop-protection product applied as labelled; dates recorded.',
+    harvestDetails: 'Harvested dry, sorted, and stored in clean labelled bags.',
+    productionRecords:
+      'Batch JB-2026-001 with field, input, harvest, and storage records.',
+  } satisfies ExportDetails,
+}
+
+const missingRecordsDemo = {
+  valuation: {
+    crop: 'maize',
+    variety: 'Mixed / unknown',
+    quantityKg: 500,
+    county: 'Nakuru',
+    grade: 'ungraded',
+    harvestStatus: 'harvested',
+  } satisfies ValuationRequest,
+  exportDetails: {
+    fertilizerOrManure: '',
+    cropProtection: '',
+    harvestDetails: '',
+    productionRecords: '',
+  } satisfies ExportDetails,
+}
+
 async function postJson<T>(path: string, payload: unknown): Promise<T> {
   const response = await fetch(path, {
     method: 'POST',
@@ -68,7 +113,7 @@ function Home() {
     useState<BrokerComparison | null>(null)
   const [cropImage, setCropImage] = useState<EncodedImage | null>(null)
   const [imageError, setImageError] = useState('')
-  const [exportDetails, setExportDetails] = useState({
+  const [exportDetails, setExportDetails] = useState<ExportDetails>({
     fertilizerOrManure: '',
     cropProtection: '',
     harvestDetails: '',
@@ -109,6 +154,23 @@ function Home() {
     value: ValuationRequest[TKey],
   ) {
     setValuationForm((current) => ({ ...current, [key]: value }))
+  }
+
+  function loadDemoPreset(kind: 'complete' | 'missing-records') {
+    const preset = kind === 'complete' ? completeDemo : missingRecordsDemo
+    if (cropImage) URL.revokeObjectURL(cropImage.previewUrl)
+    setValuationForm(preset.valuation)
+    setExportDetails(preset.exportDetails)
+    setValuation(null)
+    setValuationError('')
+    setBrokerOffer('')
+    setBrokerComparison(null)
+    setCropImage(null)
+    setImageError('')
+    setAssessment(null)
+    setAssessmentError('')
+    setMarketResults(null)
+    setMarketsError('')
   }
 
   async function submitValuation(event: React.FormEvent<HTMLFormElement>) {
@@ -266,6 +328,29 @@ function Home() {
             <h2 id="valuation-heading">Tell us about your crop</h2>
             <p>Fields marked required help us find comparable prices.</p>
           </div>
+        </div>
+
+        <div className="demo-presets" aria-label="Demo data presets">
+          <div>
+            <strong>Quick demo data</strong>
+            <span>
+              Prefill the form, then request a valuation and upload a photo.
+            </span>
+          </div>
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={() => loadDemoPreset('complete')}
+          >
+            Complete records
+          </button>
+          <button
+            className="secondary-button demo-risk-button"
+            type="button"
+            onClick={() => loadDemoPreset('missing-records')}
+          >
+            Missing records
+          </button>
         </div>
 
         <form className="form-grid" onSubmit={submitValuation}>

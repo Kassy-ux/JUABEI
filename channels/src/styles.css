@@ -229,6 +229,35 @@ h1 {
   font-weight: 800;
 }
 
+.demo-presets {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding: 0.9rem;
+  border: 1px solid #cfdabf;
+  border-radius: 12px;
+  background: #f5f8e9;
+}
+
+.demo-presets > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.demo-presets span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.demo-risk-button {
+  color: var(--warning);
+  border-color: #dfbd86;
+  background: #fff4df;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -650,6 +679,10 @@ footer strong {
   .market-explorer-heading {
     display: grid;
     align-items: start;
+  }
+
+  .demo-presets {
+    grid-template-columns: 1fr;
   }
 
   .form-span {

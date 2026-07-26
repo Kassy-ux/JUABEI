@@ -3,6 +3,7 @@ import { Hono } from 'hono';
 import { exportAssessmentRequestSchema } from '../contracts/export-assessment.js';
 import type { ExportAssessmentResponse } from '../contracts/export-assessment.js';
 import { AiDataServiceError, requestVisualAssessment } from '../lib/ai-data-client.js';
+import { findRecordComplianceGaps } from '../lib/export-records.js';
 
 export const exportAssessmentRoutes = new Hono();
 
@@ -20,6 +21,7 @@ exportAssessmentRoutes.post('/', async (c) => {
       imageBase64: parsed.data.imageBase64,
       mimeType: parsed.data.mimeType,
     });
+    const recordGaps = findRecordComplianceGaps(parsed.data);
 
     // `eligible` is retained for the frozen Channels contract, but represents
     // only whether the photo passed the visual check. The limitations and
@@ -30,6 +32,7 @@ exportAssessmentRoutes.post('/', async (c) => {
       complianceGaps: Array.from(
         new Set([
           ...visualAssessment.limitations,
+          ...recordGaps,
           'Human review is required before any final export decision.',
         ]),
       ),
