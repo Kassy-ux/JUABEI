@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "vite dev --port 3000",
+    "dev:ussd": "node scripts/dev-ussd.mjs",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
@@ -21,6 +22,7 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@ngrok/ngrok": "^1.7.0",
     "@tanstack/eslint-config": "^0.4.0",
     "@tanstack/router-cli": "^1.132.0",
     "@types/node": "^22.10.2",
