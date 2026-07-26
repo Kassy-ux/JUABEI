@@ -58,6 +58,10 @@ sandbox code, set its callback to the printed ngrok URL, and use the simulator
 to dial the code. A free ngrok URL can change after a restart, so update the
 callback each time unless `NGROK_DOMAIN` is configured.
 
+For the callback contract, local tests, sandbox walkthrough, troubleshooting,
+and production checklist, see
+[USSD Integration 101](../docs/ussd-integration-101.md).
+
 ### WhatsApp
 
 Configure the Meta webhook callback as:
