@@ -9,7 +9,7 @@ test('configuration supplies safe local defaults', () => {
   assert.equal(config.AI_DATA_PORT, 4100);
   assert.equal(config.NODE_ENV, 'development');
   assert.match(config.DATABASE_URL, /^postgres:/);
-  assert.equal(config.GEMINI_API_KEY, undefined);
+  assert.equal(config.ANTHROPIC_API_KEY, undefined);
 });
 
 test('configuration rejects invalid provider URLs', () => {

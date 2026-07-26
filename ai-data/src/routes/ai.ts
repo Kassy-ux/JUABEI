@@ -1,8 +1,9 @@
 import { createHash } from 'node:crypto';
 
+import Anthropic from '@anthropic-ai/sdk';
 import { Hono } from 'hono';
 
-import { assessExportPhoto } from '../ai/gemini.js';
+import { AnthropicNotConfiguredError, assessExportPhoto } from '../ai/claude.js';
 import { getConfig } from '../config.js';
 import { assessExportRequestSchema } from '../contracts/ai.js';
 import { saveExportAssessment } from '../db/repositories/assessments.js';
@@ -41,7 +42,7 @@ aiRoutes.post('/assess-export', async (context) => {
       crop: parsed.data.crop,
       standardsProfileId: profile.id,
       standardsProfileVersion: profile.version,
-      model: getConfig().GEMINI_MODEL,
+      model: getConfig().ANTHROPIC_MODEL,
       visualStatus: result.visualStatus,
       requiresHumanReview: true,
       confidence: result.confidence.toFixed(3),
@@ -59,14 +60,18 @@ aiRoutes.post('/assess-export', async (context) => {
       assessmentId: saved.id,
       standardsProfileId: profile.id,
       standardsProfileVersion: profile.version,
-      model: getConfig().GEMINI_MODEL,
+      model: getConfig().ANTHROPIC_MODEL,
     });
   } catch (error) {
-    console.error('Gemini visual assessment failed', error);
-    const message =
-      error instanceof Error && error.message.includes('GEMINI_API_KEY')
-        ? 'AI assessment is not configured.'
-        : 'AI assessment failed.';
-    return context.json({ error: message }, message.includes('configured') ? 503 : 502);
+    if (error instanceof AnthropicNotConfiguredError) {
+      console.error('Claude visual assessment is not configured', error);
+      return context.json({ error: 'AI assessment is not configured.' }, 503);
+    }
+    if (error instanceof Anthropic.RateLimitError) {
+      console.error('Claude visual assessment rate limited', error);
+      return context.json({ error: 'AI assessment is temporarily rate limited.' }, 429);
+    }
+    console.error('Claude visual assessment failed', error);
+    return context.json({ error: 'AI assessment failed.' }, 502);
   }
 });
